@@ -1,12 +1,25 @@
 locals {
+  # vCore tiers mapping
   vcore_tiers = {
     GeneralPurpose   = "GP"
     BusinessCritical = "BC"
     Hyperscale       = "HS"
   }
-  elastic_pool_vcore_family   = try(var.elastic_pool_sku.family, "Gen5")
-  elastic_pool_vcore_sku_name = (var.elastic_pool_sku != null && contains(keys(local.vcore_tiers), var.elastic_pool_sku.tier)) ? format("%s_%s", local.vcore_tiers[var.elastic_pool_sku.tier], local.elastic_pool_vcore_family) : null
-  elastic_pool_dtu_sku_name   = var.elastic_pool_sku != null ? format("%sPool", var.elastic_pool_sku.tier) : null
+
+  # Default family for vCore pools
+  elastic_pool_vcore_family = try(var.elastic_pool_sku.family, "Gen5")
+
+  # vCore SKU name (only computed for vCore tiers)
+  elastic_pool_vcore_sku_name = (
+    var.elastic_pool_sku != null && contains(keys(local.vcore_tiers), var.elastic_pool_sku.tier)
+  ) ? format("%s_%s", local.vcore_tiers[var.elastic_pool_sku.tier], local.elastic_pool_vcore_family) : null
+
+  # DTU SKU name (only used for DTU tiers)
+  elastic_pool_dtu_sku_name = (
+    var.elastic_pool_sku != null && !contains(keys(local.vcore_tiers), var.elastic_pool_sku.tier)
+  ) ? format("%sPool", var.elastic_pool_sku.tier) : null
+
+  # Final elastic pool SKU object
   elastic_pool_sku = var.elastic_pool_sku != null ? {
     name     = contains(keys(local.vcore_tiers), var.elastic_pool_sku.tier) ? local.elastic_pool_vcore_sku_name : local.elastic_pool_dtu_sku_name
     capacity = var.elastic_pool_sku.capacity
