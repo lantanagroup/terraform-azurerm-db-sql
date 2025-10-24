@@ -161,6 +161,7 @@ variable "databases" {
     collation                   = optional(string)
     storage_account_type        = optional(string, "Geo")
     database_extra_tags         = optional(map(string), {})
+    enclave_type                = optional(string, "VBS")
   }))
   default = []
 }

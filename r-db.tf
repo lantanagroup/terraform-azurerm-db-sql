@@ -27,6 +27,7 @@ resource "azurerm_mssql_database" "single_database" {
   restore_dropped_database_id = each.value.create_mode == "Restore" ? each.value.restore_dropped_database_id : null
 
   storage_account_type = each.value.storage_account_type
+  enclave_type         = each.value.enclave_type
 
   dynamic "threat_detection_policy" {
     for_each = var.threat_detection_policy_enabled ? ["enabled"] : []
@@ -90,6 +91,7 @@ resource "azurerm_mssql_database" "elastic_pool_database" {
   read_replica_count = startswith(local.elastic_pool_sku.name, "HS") ? each.value.read_replica_count : null
 
   storage_account_type = each.value.storage_account_type
+  enclave_type         = each.value.enclave_type
 
   dynamic "threat_detection_policy" {
     for_each = var.threat_detection_policy_enabled ? ["enabled"] : []
